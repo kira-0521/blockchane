@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 
 import {
   helloWorldContract,
-  connectWallet,
+  // connectWallet,
   updateMessage,
   loadCurrentMessage,
   getCurrentWalletConnected,
-} from './util/interact'
+} from './util/interact.js'
 import alchemylogo from './alchemylogo.svg'
 
 const HelloWorld = () => {
@@ -24,6 +24,7 @@ const HelloWorld = () => {
       setMessage(message)
     }
     callFetchMessage()
+    addSmartContractListener()
   }, [])
 
   function addSmartContractListener() {
@@ -42,8 +43,48 @@ const HelloWorld = () => {
     //TODO: implement
   }
 
+  // interact.jsだとなぜか使えない
+  const connectWallet = async () => {
+    console.log('成功！', window.ethereum)
+    if (window.ethereum) {
+      try {
+        const addressArray = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        })
+        console.log('addressArray ===> ', addressArray)
+        const obj = {
+          status: '👆🏽 Write a message in the text-field above.',
+          address: addressArray[0],
+        }
+        return obj
+      } catch (err) {
+        return {
+          address: '',
+          status: '😥 ' + err.message,
+        }
+      }
+    } else {
+      return {
+        address: '',
+        status: (
+          <span>
+            <p>
+              {' '}
+              🦊{' '}
+              <a target='_blank' href={`https://metamask.io/download.html`}>
+                You must install Metamask, a virtual Ethereum wallet, in your
+                browser.
+              </a>
+            </p>
+          </span>
+        ),
+      }
+    }
+  }
   const connectWalletPressed = async () => {
-    //TODO: implement
+    const walletResponse = await connectWallet()
+    setStatus(walletResponse.status)
+    setWallet(walletResponse.address)
   }
 
   const onUpdatePressed = async () => {
