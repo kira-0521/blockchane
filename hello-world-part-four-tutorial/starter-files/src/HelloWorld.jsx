@@ -7,6 +7,7 @@ import {
   getCurrentWalletConnected,
   connectWallet,
 } from './util/interact.js'
+import notEthPattern from './util/notEthPattern.js'
 import alchemylogo from './alchemylogo.svg'
 
 const HelloWorld = () => {
@@ -16,24 +17,26 @@ const HelloWorld = () => {
   const [message, setMessage] = useState('No connection to the network.') //default message
   const [newMessage, setNewMessage] = useState('')
 
-  //called only once
   useEffect(() => {
-    const callFetchMessage = async () => {
-      const message = await loadCurrentMessage()
-      console.log('message ===> ', message)
-      setMessage(message)
-    }
-    callFetchMessage()
-      .then(() => {
-        addSmartContractListener()
-      })
-      .then(async () => {
-        const { address, status } = await getCurrentWalletConnected()
-        setWallet(address)
-        setStatus(status)
-      })
+    // メッセージ取得
+    callFetchMessage().then(async () => {
+      // 現在のウォレット接続状況を取得
+      const { address, status } = await getCurrentWalletConnected()
+      setWallet(address)
+      setStatus(status)
+    })
+
+    // メッセージの更新をリッスン
+    addSmartContractListener()
+    // ウォレットの変更、削除などをリッスン
+    addWalletListener()
   }, [])
 
+  const callFetchMessage = async () => {
+    const message = await loadCurrentMessage()
+    console.log('message ===> ', message)
+    setMessage(message)
+  }
   const addSmartContractListener = () => {
     helloWorldContract.events.UpdatedMessages({}, (error, data) => {
       if (error) {
@@ -47,15 +50,28 @@ const HelloWorld = () => {
       }
     })
   }
+  // ユーザーがウォレットとの接続状態を変更したときUIを更新する
+  function addWalletListener() {
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length > 0) {
+          setWallet(accounts[0])
+          setStatus('👆🏽 Write a message in the text-field above.')
+        } else {
+          setWallet('')
+          setStatus('🦊 Connect to Metamask using the top right button.')
+        }
+      })
+    } else {
+      setStatus(notEthPattern)
+    }
+  }
 
+  // ウォレットとの接続
   const connectWalletPressed = async () => {
     const walletResponse = await connectWallet()
     setStatus(walletResponse.status)
     setWallet(walletResponse.address)
-  }
-
-  function addWalletListener() {
-    //TODO: implement
   }
 
   const onUpdatePressed = async () => {
