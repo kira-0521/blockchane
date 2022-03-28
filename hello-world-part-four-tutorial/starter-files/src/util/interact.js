@@ -1,20 +1,24 @@
 import { createAlchemyWeb3 } from '@alch/alchemy-web3'
 import contractABI from '../contract-abi.json'
+import notEthPattern from './notEthPattern'
 
 const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY
+const web3 = createAlchemyWeb3(alchemyKey)
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS
-export const web3 = createAlchemyWeb3(alchemyKey)
 
+// helloworldコントラクトオブジェクトをインスタンス化
 export const helloWorldContract = new web3.eth.Contract(
   contractABI,
   contractAddress
 )
 
+// 現在のメッセージ取得
 export const loadCurrentMessage = async () => {
   const message = await helloWorldContract.methods.world().call()
   return message
 }
 
+// ウォレットとの接続
 export const connectWallet = async () => {
   console.log('成功！', window.ethereum)
   if (window.ethereum) {
@@ -36,22 +40,12 @@ export const connectWallet = async () => {
   } else {
     return {
       address: '',
-      status: (
-        <span>
-          <p>
-            {' '}
-            🦊{' '}
-            <a target='_blank' href={`https://metamask.io/download.html`}>
-              You must install Metamask, a virtual Ethereum wallet, in your
-              browser.
-            </a>
-          </p>
-        </span>
-      ),
+      status: notEthPattern,
     }
   }
 }
 
+// 現在のウォレットとの接続状況を確認
 export const getCurrentWalletConnected = async () => {
   if (window.ethereum) {
     try {
@@ -79,18 +73,7 @@ export const getCurrentWalletConnected = async () => {
   } else {
     return {
       address: '',
-      status: (
-        <span>
-          <p>
-            {' '}
-            🦊{' '}
-            <a target='_blank' href={`https://metamask.io/download.html`}>
-              You must install Metamask, a virtual Ethereum wallet, in your
-              browser.
-            </a>
-          </p>
-        </span>
-      ),
+      status: notEthPattern,
     }
   }
 }
