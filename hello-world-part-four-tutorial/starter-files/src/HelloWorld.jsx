@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 
 import {
   helloWorldContract,
-  // connectWallet,
   updateMessage,
   loadCurrentMessage,
   getCurrentWalletConnected,
+  connectWallet,
 } from './util/interact.js'
 import alchemylogo from './alchemylogo.svg'
 
@@ -24,14 +24,23 @@ const HelloWorld = () => {
       setMessage(message)
     }
     callFetchMessage()
-    addSmartContractListener()
+      .then(() => {
+        addSmartContractListener()
+      })
+      .then(async () => {
+        const { address, status } = await getCurrentWalletConnected()
+        setWallet(address)
+        setStatus(status)
+      })
   }, [])
 
-  function addSmartContractListener() {
+  const addSmartContractListener = () => {
     helloWorldContract.events.UpdatedMessages({}, (error, data) => {
       if (error) {
+        console.log('error', error)
         setStatus('😥 ' + error.message)
       } else {
+        console.log('data', data)
         setMessage(data.returnValues[1])
         setNewMessage('')
         setStatus('🎉 Your message has been updated!')
@@ -39,52 +48,14 @@ const HelloWorld = () => {
     })
   }
 
-  function addWalletListener() {
-    //TODO: implement
-  }
-
-  // interact.jsだとなぜか使えない
-  const connectWallet = async () => {
-    console.log('成功！', window.ethereum)
-    if (window.ethereum) {
-      try {
-        const addressArray = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        })
-        console.log('addressArray ===> ', addressArray)
-        const obj = {
-          status: '👆🏽 Write a message in the text-field above.',
-          address: addressArray[0],
-        }
-        return obj
-      } catch (err) {
-        return {
-          address: '',
-          status: '😥 ' + err.message,
-        }
-      }
-    } else {
-      return {
-        address: '',
-        status: (
-          <span>
-            <p>
-              {' '}
-              🦊{' '}
-              <a target='_blank' href={`https://metamask.io/download.html`}>
-                You must install Metamask, a virtual Ethereum wallet, in your
-                browser.
-              </a>
-            </p>
-          </span>
-        ),
-      }
-    }
-  }
   const connectWalletPressed = async () => {
     const walletResponse = await connectWallet()
     setStatus(walletResponse.status)
     setWallet(walletResponse.address)
+  }
+
+  function addWalletListener() {
+    //TODO: implement
   }
 
   const onUpdatePressed = async () => {
@@ -107,7 +78,7 @@ const HelloWorld = () => {
       </button>
 
       <h2 style={{ paddingTop: '50px' }}>Current Message:</h2>
-      <p>{message}</p>
+      <p>message: {message}</p>
 
       <h2 style={{ paddingTop: '18px' }}>New Message:</h2>
 
@@ -118,7 +89,7 @@ const HelloWorld = () => {
           onChange={(e) => setNewMessage(e.target.value)}
           value={newMessage}
         />
-        <p id='status'>{status}</p>
+        <p id='status'>state: {status}</p>
 
         <button id='publish' onClick={onUpdatePressed}>
           Update
