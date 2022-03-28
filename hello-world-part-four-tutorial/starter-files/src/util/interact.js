@@ -78,4 +78,50 @@ export const getCurrentWalletConnected = async () => {
   }
 }
 
-export const updateMessage = async (address, message) => {}
+export const updateMessage = async (address, message) => {
+  // ethereumオブジェクトが存在しない or スマコンのアドレスが間違っている
+  if (!window.ethereum || address === null) {
+    return {
+      status:
+        '💡 Connect your Metamask wallet to update the message on the blockchain.',
+    }
+  }
+
+  // 文字が未入力
+  if (message.trim() === '') {
+    return {
+      status: '❌ Your message cannot be an empty string.',
+    }
+  }
+
+  // トランザクションのためのパラーメータをセットアップ
+  const transactionParameters = {
+    to: contractAddress,
+    from: address,
+    data: helloWorldContract.methods.update(message).encodeABI(),
+  }
+
+  try {
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [transactionParameters],
+    })
+    return {
+      status: (
+        <span>
+          ✅{' '}
+          <a target='_blank' href={`https://ropsten.etherscan.io/tx/${txHash}`}>
+            View the status of your transaction on Etherscan!
+          </a>
+          <br />
+          ℹ️ Once the transaction is verified by the network, the message will
+          be updated automatically.
+        </span>
+      ),
+    }
+  } catch (error) {
+    return {
+      status: '😥 ' + error.message,
+    }
+  }
+}

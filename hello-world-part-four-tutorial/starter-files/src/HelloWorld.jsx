@@ -51,7 +51,7 @@ const HelloWorld = () => {
     })
   }
   // ユーザーがウォレットとの接続状態を変更したときUIを更新する
-  function addWalletListener() {
+  const addWalletListener = () => {
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', (accounts) => {
         if (accounts.length > 0) {
@@ -75,7 +75,8 @@ const HelloWorld = () => {
   }
 
   const onUpdatePressed = async () => {
-    //TODO: implement
+    const { status } = await updateMessage(walletAddress, newMessage)
+    setStatus(status)
   }
 
   //the UI of our component
