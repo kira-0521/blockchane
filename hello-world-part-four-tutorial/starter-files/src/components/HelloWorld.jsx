@@ -19,30 +19,13 @@ import alchemylogo from '../assets/alchemylogo.svg'
 
 const HelloWorld = memo(() => {
   //state variables
-  const [walletAddress, setWallet] = useState('')
   const [status, setStatus] = useState('')
   const [message, setMessage] = useState('No connection to the network.') //default message
   const [newMessage, setNewMessage] = useState('')
-
-  const walletName = useContext(WalletContext)
-  console.log(walletName)
+  const { walletAddress, setWallet } = useContext(WalletContext)
 
   const onSetNewMessage = useCallback((e) => setNewMessage(e.target.value), [])
 
-  useEffect(() => {
-    // メッセージ取得
-    callFetchMessage().then(async () => {
-      // 現在のウォレット接続状況を取得
-      const { address, status } = await getCurrentWalletConnected()
-      setWallet(address)
-      setStatus(status)
-    })
-
-    // メッセージの更新をリッスン
-    addSmartContractListener()
-    // ウォレットの変更、削除などをリッスン
-    addWalletListener()
-  }, [])
   const callFetchMessage = useCallback(async () => {
     const message = await loadCurrentMessage()
     console.log('message ===> ', message)
@@ -75,20 +58,35 @@ const HelloWorld = memo(() => {
     } else {
       setStatus(notEthPattern)
     }
-  }, [])
+  }, [setWallet])
+
+  useEffect(() => {
+    // メッセージ取得
+    callFetchMessage().then(async () => {
+      // 現在のウォレット接続状況を取得
+      const { address, status } = await getCurrentWalletConnected()
+      setWallet(address)
+      setStatus(status)
+    })
+
+    // メッセージの更新をリッスン
+    addSmartContractListener()
+    // ウォレットの変更、削除などをリッスン
+    addWalletListener()
+  }, [setWallet, callFetchMessage, addSmartContractListener, addWalletListener])
 
   // ウォレットとの接続
   const connectWalletPressed = useCallback(async () => {
     const walletResponse = await connectWallet()
     setStatus(walletResponse.status)
     setWallet(walletResponse.address)
-  }, [])
+  }, [setWallet])
 
   // メッセージの更新
   const onUpdatePressed = useCallback(async () => {
     const { status } = await updateMessage(walletAddress, newMessage)
     setStatus(status)
-  }, [])
+  }, [walletAddress, newMessage])
 
   //the UI of our component
   return (
