@@ -8,7 +8,7 @@ import {
   connectWallet,
 } from './util/interact.js'
 import notEthPattern from './util/notEthPattern.js'
-import alchemylogo from './alchemylogo.svg'
+import alchemylogo from './assets/alchemylogo.svg'
 
 const HelloWorld = () => {
   //state variables
@@ -74,6 +74,7 @@ const HelloWorld = () => {
     setWallet(walletResponse.address)
   }
 
+  // メッセージの更新
   const onUpdatePressed = async () => {
     const { status } = await updateMessage(walletAddress, newMessage)
     setStatus(status)

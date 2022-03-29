@@ -1,5 +1,5 @@
 import { createAlchemyWeb3 } from '@alch/alchemy-web3'
-import contractABI from '../contract-abi.json'
+import contractABI from '../assets/contract-abi.json'
 import notEthPattern from './notEthPattern'
 
 const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY
