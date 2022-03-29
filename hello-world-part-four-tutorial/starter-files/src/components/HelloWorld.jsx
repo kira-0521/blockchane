@@ -6,9 +6,9 @@ import {
   loadCurrentMessage,
   getCurrentWalletConnected,
   connectWallet,
-} from './util/interact.js'
-import notEthPattern from './util/notEthPattern.js'
-import alchemylogo from './assets/alchemylogo.svg'
+} from '../util/interact'
+import notEthPattern from '../util/notEthPattern.js'
+import alchemylogo from '../assets/alchemylogo.svg'
 
 const HelloWorld = () => {
   //state variables
@@ -16,6 +16,8 @@ const HelloWorld = () => {
   const [status, setStatus] = useState('')
   const [message, setMessage] = useState('No connection to the network.') //default message
   const [newMessage, setNewMessage] = useState('')
+
+  const onSetNewMessage = (e) => setNewMessage(e.target.value)
 
   useEffect(() => {
     // メッセージ取得
@@ -104,7 +106,7 @@ const HelloWorld = () => {
         <input
           type='text'
           placeholder='Update the message in your smart contract.'
-          onChange={(e) => setNewMessage(e.target.value)}
+          onChange={onSetNewMessage}
           value={newMessage}
         />
         <p id='status'>state: {status}</p>
