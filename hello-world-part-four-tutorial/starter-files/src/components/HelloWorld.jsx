@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, memo } from 'react'
 
 import {
   helloWorldContract,
@@ -10,14 +10,14 @@ import {
 import notEthPattern from '../util/notEthPattern.js'
 import alchemylogo from '../assets/alchemylogo.svg'
 
-const HelloWorld = () => {
+const HelloWorld = memo(() => {
   //state variables
   const [walletAddress, setWallet] = useState('')
   const [status, setStatus] = useState('')
   const [message, setMessage] = useState('No connection to the network.') //default message
   const [newMessage, setNewMessage] = useState('')
 
-  const onSetNewMessage = (e) => setNewMessage(e.target.value)
+  const onSetNewMessage = useCallback((e) => setNewMessage(e.target.value), [])
 
   useEffect(() => {
     // メッセージ取得
@@ -33,13 +33,12 @@ const HelloWorld = () => {
     // ウォレットの変更、削除などをリッスン
     addWalletListener()
   }, [])
-
-  const callFetchMessage = async () => {
+  const callFetchMessage = useCallback(async () => {
     const message = await loadCurrentMessage()
     console.log('message ===> ', message)
     setMessage(message)
-  }
-  const addSmartContractListener = () => {
+  }, [])
+  const addSmartContractListener = useCallback(() => {
     helloWorldContract.events.UpdatedMessages({}, (error, data) => {
       if (error) {
         console.log('error', error)
@@ -51,9 +50,8 @@ const HelloWorld = () => {
         setStatus('🎉 Your message has been updated!')
       }
     })
-  }
-  // ユーザーがウォレットとの接続状態を変更したときUIを更新する
-  const addWalletListener = () => {
+  }, [])
+  const addWalletListener = useCallback(() => {
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', (accounts) => {
         if (accounts.length > 0) {
@@ -67,20 +65,20 @@ const HelloWorld = () => {
     } else {
       setStatus(notEthPattern)
     }
-  }
+  }, [])
 
   // ウォレットとの接続
-  const connectWalletPressed = async () => {
+  const connectWalletPressed = useCallback(async () => {
     const walletResponse = await connectWallet()
     setStatus(walletResponse.status)
     setWallet(walletResponse.address)
-  }
+  }, [])
 
   // メッセージの更新
-  const onUpdatePressed = async () => {
+  const onUpdatePressed = useCallback(async () => {
     const { status } = await updateMessage(walletAddress, newMessage)
     setStatus(status)
-  }
+  }, [])
 
   //the UI of our component
   return (
@@ -109,7 +107,7 @@ const HelloWorld = () => {
           onChange={onSetNewMessage}
           value={newMessage}
         />
-        <p id='status'>state: {status}</p>
+        <p id='status'>status: {status}</p>
 
         <button id='publish' onClick={onUpdatePressed}>
           Update
@@ -117,6 +115,6 @@ const HelloWorld = () => {
       </div>
     </div>
   )
-}
+})
 
 export default HelloWorld
