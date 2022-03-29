@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, memo } from 'react'
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useContext,
+  memo,
+} from 'react'
 
 import {
   helloWorldContract,
@@ -7,6 +13,7 @@ import {
   getCurrentWalletConnected,
   connectWallet,
 } from '../util/interact'
+import { WalletContext } from '../providers/WalletProvider'
 import notEthPattern from '../util/notEthPattern.js'
 import alchemylogo from '../assets/alchemylogo.svg'
 
@@ -16,6 +23,9 @@ const HelloWorld = memo(() => {
   const [status, setStatus] = useState('')
   const [message, setMessage] = useState('No connection to the network.') //default message
   const [newMessage, setNewMessage] = useState('')
+
+  const walletName = useContext(WalletContext)
+  console.log(walletName)
 
   const onSetNewMessage = useCallback((e) => setNewMessage(e.target.value), [])
 
