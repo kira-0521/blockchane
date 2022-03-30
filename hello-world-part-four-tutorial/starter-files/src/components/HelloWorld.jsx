@@ -24,8 +24,6 @@ const HelloWorld = memo(() => {
   const [newMessage, setNewMessage] = useState('')
   const { walletAddress, setWallet } = useContext(WalletContext)
 
-  const onSetNewMessage = useCallback((e) => setNewMessage(e.target.value), [])
-
   const callFetchMessage = useCallback(async () => {
     const message = await loadCurrentMessage()
     console.log('message ===> ', message)
@@ -75,24 +73,24 @@ const HelloWorld = memo(() => {
     addWalletListener()
   }, [setWallet, callFetchMessage, addSmartContractListener, addWalletListener])
 
+  // 入力値をセット
+  const onSetNewMessage = useCallback((e) => setNewMessage(e.target.value), [])
   // ウォレットとの接続
-  const connectWalletPressed = useCallback(async () => {
+  const onConnectWalletPressed = useCallback(async () => {
     const walletResponse = await connectWallet()
     setStatus(walletResponse.status)
     setWallet(walletResponse.address)
   }, [setWallet])
-
   // メッセージの更新
   const onUpdatePressed = useCallback(async () => {
     const { status } = await updateMessage(walletAddress, newMessage)
     setStatus(status)
   }, [walletAddress, newMessage])
 
-  //the UI of our component
   return (
     <div id='container'>
       <img id='logo' src={alchemylogo}></img>
-      <button id='walletButton' onClick={connectWalletPressed}>
+      <button id='walletButton' onClick={onConnectWalletPressed}>
         {walletAddress.length > 0 ? (
           'Connected: ' +
           String(walletAddress).substring(0, 6) +
